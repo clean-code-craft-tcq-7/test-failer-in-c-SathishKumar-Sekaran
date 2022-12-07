@@ -1,41 +1,57 @@
 #include <stdio.h>
 #include <assert.h>
+#include <string.h>
+#include "misaligned.h"
 
-int test_CompinationNumber[5][5];
-const char* test_MajorColor[5][5];
-const char* test_MinorColor[5][5];
+
+const char* majorColor[] = {"White", "Red", "Black", "Yellow", "Violet"};
+const char* minorColor[] = {"Blue", "Orange", "Green", "Brown", "Slate"};
+
+colorPair colorPairedNames[MAX_COLOR_PAIR];
+
+
+void printPairedColor(char* colorPairBuff, int Idx)
+{
+    memset(colorPairBuff, 0, TABLE_ROW_SIZE);
+    sprintf(colorPairBuff, "%-2d | %-6s | %s",colorPairedNames[Idx].colorSequenceNumber,colorPairedNames[Idx].majorColor, colorPairedNames[Idx].minorColor);
+}
+
 
 int printColorMap() {
-    const char* majorColor[] = {"White", "Red", "Black", "Yellow", "Violet"};
-    const char* minorColor[] = {"Blue", "Orange", "Green", "Brown", "Slate"};
+	int colorCount = 0;
+	char colorPairBuffdata[TABLE_ROW_SIZE];
     int i = 0, j = 0;
     for(i = 0; i < 5; i++) {
         for(j = 0; j < 5; j++) {
-            test_CompinationNumber[i][j] =  i * 5 + j;
-            test_MajorColor[i][j] =  majorColor[i];
-            test_MinorColor[i][j] =  minorColor[i];
-            printf("%d | %s | %s\n", i * 5 + j, majorColor[i], minorColor[i]);
-            
+			colorCount = i * 5 + j;
+            colorPairedNames[colorCount].colorSequenceNumber =  colorCount+1;
+            colorPairedNames[colorCount].majorColor =  majorColor[i];
+            colorPairedNames[colorCount].minorColor =  minorColor[j];
+            printPairedColor(colorPairBuffdata,colorCount);
+			printf("%s\n",colorPairBuffdata);
         }
     }
     return i * j;
 }
 
-void testColorMap(int MajorColorIdx,int MinorColorIdx, int expected_CompinationNumber,
-                        char* expectedMajorColor,char* expectedMinorColor)
+void testColorMap(int Idx, int expected_SeqNumber,
+                    const char* expectedMajorColor,const char* expectedMinorColor)
 {
-    assert(test_CompinationNumber[MajorColorIdx][MinorColorIdx] == expected_CompinationNumber);
-    assert(test_MajorColor[MajorColorIdx][MinorColorIdx] == expectedMajorColor);
-    assert(test_MinorColor[MajorColorIdx][MinorColorIdx] == expectedMinorColor);
+    assert(colorPairedNames[Idx].colorSequenceNumber == expected_SeqNumber);
+	assert(strcmp(colorPairedNames[Idx].majorColor, expectedMajorColor) == 0);
+	assert(strcmp(colorPairedNames[Idx].minorColor, expectedMinorColor) == 0);
 }
 
 int main() {
+	int i=0,j=0,countIdx=0;
     int result = printColorMap();
     assert(result == 25);
-    testColorMap(0,0,0,"White","Blue");
-    testColorMap(0,4,4,"White","Slate");
-    testColorMap(2,3,12,"Black","Brown");
-    testColorMap(4,0,20,"Violet","Blue");
+	for(i = 0; i < 5; i++) {
+        for(j = 0; j < 5; j++) {
+			countIdx = i * 5 + j;
+			testColorMap(countIdx,(countIdx+1),majorColor[i],minorColor[j]);
+		}
+	}
     printf("All is well (maybe!)\n");
     return 0;
 }
